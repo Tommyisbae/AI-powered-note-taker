@@ -1,6 +1,2 @@
 Access to fetch at 'https://ai-powered-note-taker.vercel.app/generate-note' from origin 'https://mozilla.github.io' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
-ai-powered-note-taker.vercel.app/generate-note:1  Failed to load resource: net::ERR_FAILEDUnderstand this error
-viewer.html:1 Access to fetch at 'https://ai-powered-note-taker.vercel.app/generate-note' from origin 'https://mozilla.github.io' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
-ai-powered-note-taker.vercel.app/generate-note:1  Failed to load resource: net::ERR_FAILEDUnderstand this error
-viewer.html:1 Access to fetch at 'https://ai-powered-note-taker.vercel.app/generate-note' from origin 'https://mozilla.github.io' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
-ai-powered-note-taker.vercel.app/generate-note:1  Failed to load resource: net::ERR_FAILEDUnderstand this error
+content_script.js:38  POST https://ai-powered-note-taker.vercel.app/generate-note net::ERR_FAILED

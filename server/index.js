@@ -15,7 +15,9 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 const corsOptions = {
   origin: 'https://mozilla.github.io',
-  optionsSuccessStatus: 200 
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
