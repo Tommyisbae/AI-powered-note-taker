@@ -13,7 +13,12 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-app.use(cors());
+const corsOptions = {
+  origin: 'https://mozilla.github.io',
+  optionsSuccessStatus: 200 
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get('/', (req, res) => {
