@@ -1,8 +1,8 @@
 # Dependencies
-/server/node_modules
+/api/node_modules
 
 # Environment variables
-/server/.env
+/api/.env
 
 # Logs
 *.log
@@ -13,4 +13,4 @@ yarn-error.log*
 # OS generated files
 .DS_Store
 Thumbs.db
-server/serviceAccountKey.json
+api/serviceAccountKey.json

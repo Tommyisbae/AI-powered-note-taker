@@ -1,2 +1,31 @@
-Access to fetch at 'https://ai-powered-note-taker.vercel.app/generate-note' from origin 'https://mozilla.github.io' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
-content_script.js:38  POST https://ai-powered-note-taker.vercel.app/generate-note net::ERR_FAILED
+Deployment Summary
+No framework detected
+
+
+Static Assets
+
+
+All (3)
+
+
+JS (1)
+
+
+Misc (2)
+
+
+/index.js
+4.83 kB
+
+
+/package-lock.json
+40 kB
+
+
+/package.json
+443 B 
+
+Assigning Custom Domains
+ai-powered-note-taker.vercel.app
+·
+Custom Domain
