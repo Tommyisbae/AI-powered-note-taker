@@ -99,6 +99,4 @@ app.post('/generate-note', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
-});
+module.exports = app;
