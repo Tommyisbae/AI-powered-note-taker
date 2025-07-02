@@ -35,7 +35,7 @@ document.addEventListener('mouseup', async (e) => {
       try {
         if (isPopupOpen) chrome.runtime.sendMessage({ action: 'generation_started' });
 
-        const response = await fetch('http://localhost:5000/generate-note', {
+        const response = await fetch('https://ai-powered-note-taker.vercel.app/generate-note', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
