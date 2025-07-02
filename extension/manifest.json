@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Smart PDF Notetaker",
+  "version": "1.0",
+  "description": "Highlight text in PDFs and get AI-powered notes.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "downloads"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://mozilla.github.io/pdf.js/web/viewer.html"],
+      "js": ["content_script.js"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
