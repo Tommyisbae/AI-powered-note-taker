@@ -13,14 +13,17 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-const corsOptions = {
-  origin: 'https://mozilla.github.io',
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://mozilla.github.io');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
-app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get('/', (req, res) => {
