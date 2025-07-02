@@ -33,11 +33,11 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-app.get('/api/', (req, res) => {
+app.get('/', (req, res) => {
   res.send('Smart PDF Notetaker Backend is running!');
 });
 
-app.post('/api/generate-note', async (req, res) => {
+app.post('/generate-note', async (req, res) => {
   res.status(200).json({ note: "This is a test note.", question: "This is a test question." });
 });
 
