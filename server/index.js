@@ -8,6 +8,13 @@ const multer = require('multer');
 const app = express();
 const port = process.env.PORT || 5000;
 
+// --- Comprehensive Logging Middleware ---
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] Received ${req.method} request for ${req.url}`);
+  console.log('Request Headers:', req.headers);
+  next();
+});
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
