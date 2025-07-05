@@ -67,6 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
         allNotes[currentPdfId].splice(noteIndex, 1);
         chrome.storage.local.set({ allNotes: allNotes }, loadNotes);
       });
+    } else if (e.target.classList.contains('toggle-answer')) {
+      const answer = e.target.nextElementSibling;
+      const isHidden = answer.style.display === 'none';
+      answer.style.display = isHidden ? 'block' : 'none';
+      e.target.textContent = isHidden ? 'Hide Answer' : 'Show Answer';
     }
   });
 
@@ -87,28 +92,24 @@ document.addEventListener('DOMContentLoaded', () => {
       chrome.storage.local.get({ allNotes: {} }, (result) => {
         const notes = result.allNotes[currentPdfId] || [];
         if (notes.length === 0) {
-          console.log('No notes to save.');
           return;
         }
 
-        let noteContent = `Notes for: ${currentPdfId}\n\n`;
-        notes.forEach(note => {
-          noteContent += `Page ${note.pageNumber}: ${note.note}\n\n`;
-        });
+        // Prepare data for JSON export
+        const flashcards = notes.map(note => ({
+          question: note.question,
+          answer: note.note
+        }));
 
-        console.log('Generated file content:', noteContent);
-
-        const blob = new Blob([noteContent], { type: 'text/plain' });
+        const blob = new Blob([JSON.stringify(flashcards, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
 
         chrome.downloads.download({
           url: url,
-          filename: `${currentPdfId.replace(/[^a-z0-9]/gi, '_')}_notes.txt`
+          filename: `${currentPdfId.replace(/[^a-z0-9]/gi, '_')}_flashcards.json`
         }, (downloadId) => {
           if (chrome.runtime.lastError) {
             console.error('Save failed:', chrome.runtime.lastError.message);
-          } else {
-            console.log('Save successful. Download ID:', downloadId);
           }
         });
       });

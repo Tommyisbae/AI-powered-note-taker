@@ -82,18 +82,13 @@ h1 {
   font-weight: 600;
 }
 
-.notes-list p {
-  margin: 8px 0 0;
+.notes-list p.question {
+  margin: 8px 0;
+  font-style: italic;
+  color: #333;
 }
 
-.notes-list em {
-  color: #555;
-}
-
-.answer {
-  background-color: #e9ecef;
-  padding: 8px;
-  border-radius: 3px;
+.answer-container {
   margin-top: 8px;
 }
 
@@ -102,9 +97,17 @@ h1 {
   border: none;
   color: #007bff;
   cursor: pointer;
-  padding: 5px 0;
+  padding: 0;
   font-size: 12px;
   text-decoration: underline;
+  margin-bottom: 5px;
+}
+
+.answer {
+  background-color: #e9ecef;
+  padding: 8px;
+  border-radius: 3px;
+  color: #495057;
 }
 
 .button-group {
