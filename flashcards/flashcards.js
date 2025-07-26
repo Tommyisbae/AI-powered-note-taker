@@ -19,14 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
       reader.onload = (e) => {
         try {
           cards = JSON.parse(e.target.result);
-          if (cards.length > 0) {
+          if (Array.isArray(cards) && cards.length > 0) {
             document.querySelector('.file-loader').classList.add('hidden');
             flashcardView.classList.remove('hidden');
             currentIndex = 0;
             displayCard();
+          } else {
+            alert('JSON file must contain an array of flashcards.');
           }
         } catch (error) {
-          alert('Invalid JSON file.');
+          alert('Invalid JSON file: ' + error.message);
         }
       };
       reader.readAsText(file);
@@ -37,8 +39,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cards.length === 0) return;
 
     const card = cards[currentIndex];
-    cardFront.textContent = card.question;
-    cardBack.textContent = card.answer;
+    
+    // Clear previous content
+    cardFront.innerHTML = '';
+    cardBack.innerHTML = '';
+
+    // Sanitize and render question
+    const questionNode = document.createElement('div');
+    questionNode.textContent = card.question;
+    cardFront.appendChild(questionNode);
+
+    // Sanitize and render answer
+    const answerNode = document.createElement('div');
+    if (Array.isArray(card.answer)) {
+      const ul = document.createElement('ul');
+      card.answer.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        ul.appendChild(li);
+      });
+      answerNode.appendChild(ul);
+    } else {
+      answerNode.textContent = card.answer;
+    }
+    cardBack.appendChild(answerNode);
 
     flashcard.classList.remove('is-flipped');
     updateCounter();

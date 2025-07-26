@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenerativeAI } = require('@google/genai');
 
 // Initialize the AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -25,12 +25,62 @@ module.exports = async (req, res) => {
       }
 
       const topic = currentTopic || 'General';
-      const prompt = `You are an expert academic note-taker. Your primary function is to transform a user's raw highlight into a comprehensive, standalone note that is perfect for studying.\n\n**Provided Information:**\n- **Overall Topic/Chapter:** ${topic}\n- **User's Specific Highlight:** "${highlightedText}"\n${surroundingText ? `- **Full Text from Page:**\n"""\n${surroundingText}\n"""` : ''}\n\n**Your Critical Task:**\nThe user's highlight is just a pointer to an important concept on the page. It is NOT the final note. Your task is to synthesize a high-quality, educational note by doing the following:\n1.  **Identify the Core Concept:** Read the **User's Specific Highlight**.\n2.  **Gather Context:** Scan the **Full Text from Page** to find definitions, explanations, or related ideas that give the highlight its full meaning. For example, if the user highlights a term, find its definition in the surrounding text. If they highlight an effect, find the cause.\n3.  **Synthesize the Note:** Combine the core concept from the highlight with the essential context you gathered. The final note MUST be self-contained and understandable without referring back to the original document. It should be 2-3 sentences long. **Crucially, do not just rephrase the highlight.** Integrate information from the surrounding text to make it a complete thought.\n4.  **Create a Recall Question:** Based on your synthesized note, formulate a question that would test a student's understanding of the complete concept.\n\n**Output Format:**\nRespond with a single, valid JSON object with two keys: "note" and "question".`;
+      const prompt = JSON.stringify({
+        context: {
+          persona: "You are an expert academic note-taker.",
+          goal: "Your primary function is to transform a user's raw highlight into a comprehensive, standalone note that is perfect for studying. The user's highlight is just a pointer to an important concept on the page, not the final note itself."
+        },
+        task_definition: {
+          steps: [
+            {
+              step: 1,
+              action: "Identify Core Concept",
+              details: "Read the 'userHighlight' from the input_data to understand the user's point of interest."
+            },
+            {
+              step: 2,
+              action: "Gather Context",
+              details: "Scan the 'fullTextFromPage' to find definitions, explanations, or related ideas that give the highlight its full meaning. For example, if the user highlights a term, find its definition. If they highlight an effect, find the cause."
+            },
+            {
+              step: 3,
+              action: "Synthesize Note",
+              details: "Combine the core concept with the essential context. The final note must be self-contained, 2-3 sentences long, and understandable without the original document. **Crucially, do not just rephrase the highlight.** Integrate information from the surrounding text to make it a complete thought."
+            },
+            {
+              step: 4,
+              action: "Create Recall Question",
+              details: "Based on your synthesized note, formulate a question that tests a student's understanding of the complete concept."
+            }
+          ]
+        },
+        input_data: {
+          overallTopic: topic,
+          userHighlight: highlightedText,
+          fullTextFromPage: surroundingText || "No surrounding text provided."
+        },
+        output_specification: {
+          format: "Respond with a single, valid JSON object.",
+          schema: {
+            type: "object",
+            properties: {
+              note: {
+                type: "string",
+                description: "The synthesized, self-contained note."
+              },
+              question: {
+                type: "string",
+                description: "The active recall question based on the note."
+              }
+            },
+            required: ["note", "question"]
+          }
+        }
+      });
 
       const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      const cleanedText = text.replace(/```json\n?|\n?```/g, '');
+      // The new SDK simplifies the response structure.
+      const cleanedText = result.response.text().replace(/```json\n?|\n?```/g, '');
       const parsedResponse = JSON.parse(cleanedText);
 
       const noteData = {
