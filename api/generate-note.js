@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { GoogleAIFileManager, GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenerativeAI } = require('@google/genai');
 
 // Initialize the AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
