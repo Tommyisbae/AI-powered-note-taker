@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const clearButton = document.getElementById('clear-notes');
   const saveButton = document.getElementById('save-notes');
   const statusMessage = document.getElementById('status-message');
+  const customNoteInput = document.getElementById('custom-note-input');
+  const addCustomNoteButton = document.getElementById('add-custom-note');
   let currentPdfId = null;
 
   // Get the current PDF's ID from the content script
@@ -21,12 +23,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const li = document.createElement('li');
     li.className = 'note-item';
     li.dataset.index = index;
-    li.innerHTML = `
-      <button class="delete-note" title="Delete Note">&times;</button>
-      <strong>Page ${note.pageNumber}:</strong> ${note.note}
-    `;
+
+    let noteContent;
+    if (note.type === 'custom') {
+      noteContent = `
+        <button class="delete-note" title="Delete Note">&times;</button>
+        <strong>Custom Note:</strong> ${note.note}
+      `;
+    } else {
+      noteContent = `
+        <button class="delete-note" title="Delete Note">&times;</button>
+        <strong>Page ${note.pageNumber}:</strong> ${note.note}
+      `;
+    }
+    li.innerHTML = noteContent;
     return li;
   }
+
+  addCustomNoteButton.addEventListener('click', () => {
+    const noteText = customNoteInput.value.trim();
+    if (noteText && currentPdfId) {
+      const newNote = {
+        type: 'custom',
+        note: noteText,
+        timestamp: new Date().toISOString()
+      };
+
+      chrome.storage.local.get({ allNotes: {} }, (result) => {
+        const allNotes = result.allNotes;
+        if (!allNotes[currentPdfId]) {
+          allNotes[currentPdfId] = [];
+        }
+        allNotes[currentPdfId].push(newNote);
+        chrome.storage.local.set({ allNotes: allNotes }, () => {
+          customNoteInput.value = ''; // Clear the textarea
+          loadNotes();
+        });
+      });
+    }
+  });
 
   function loadNotes() {
     if (!currentPdfId) return;
@@ -40,6 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
         notes.forEach((note, index) => {
           notesList.appendChild(createNoteElement(note, index));
         });
+        // Automatically scroll to the bottom of the notes list
+        notesList.scrollTop = notesList.scrollHeight;
       }
     });
   }

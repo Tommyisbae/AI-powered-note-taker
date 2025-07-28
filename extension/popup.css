@@ -28,6 +28,27 @@ h1 {
   text-overflow: ellipsis;
 }
 
+.custom-note-container {
+  margin-bottom: 15px;
+}
+
+#custom-note-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  resize: vertical;
+  min-height: 60px;
+  margin-bottom: 10px;
+}
+
+#add-custom-note {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
 .notes-list {
   list-style: none;
   padding: 0;

@@ -32,23 +32,28 @@ module.exports = async (req, res) => {
             {
               step: 1,
               action: "Analyze and Group",
-              details: "Read through all the notes to identify core themes, topics, and sub-topics. Group related notes together logically."
+              details: "Read through all the notes (which may be from highlights or custom user input) to identify core themes and topics. Group related notes together logically."
             },
             {
               step: 2,
-              action: "Synthesize and Refine",
-              details: "Merge the information from related notes. It is critical to eliminate redundant information and resolve any minor discrepancies. The goal is to create a narrative or a structured explanation of the concepts, not just a list of the original notes. Ensure the flow of information is logical and easy to follow."
+              action: "Synthesize and Refine Main Body",
+              details: "Merge the information from related notes to create a structured explanation of the concepts. Eliminate redundancies and resolve discrepancies. The goal is a logical, easy-to-follow narrative."
             },
             {
               step: 3,
+              action: "Handle Out-of-Context Notes",
+              details: "During synthesis, if you encounter any notes that are completely unrelated to the main topics or cannot be logically integrated into the main structure, set them aside."
+            },
+            {
+              step: 4,
               action: "Structure and Format",
-              details: "Organize the synthesized information into a clear, hierarchical document using Markdown."
+              details: "Organize the synthesized information into a clear, hierarchical document using Markdown. After the main body, if you have set aside any out-of-context notes, create a final section titled '## Miscellaneous Notes' and list them there as bullet points."
             }
           ]
         },
         input_data: {
           document_title: title,
-          notes: notes // This will now be an array of strings
+          notes: notes // This is an array of strings
         },
         output_specification: {
           format: "A single string containing the complete, formatted Markdown document.",
@@ -57,7 +62,8 @@ module.exports = async (req, res) => {
             headings: "Use '##' for main topics and '###' for sub-topics.",
             content: "Use bullet points ('*') or numbered lists for clarity.",
             key_terms: "Use bold ('**') to highlight key terms.",
-            style: "The final output should be a clean, readable, and useful study guide, like a well-organized set of jottings perfect for revision. Do not include any questions or conversational preamble."
+            miscellaneous_section: "If needed, create a final '## Miscellaneous Notes' section for unrelated jottings.",
+            style: "The final output should be a clean, readable study guide. Do not include any questions or conversational preamble."
           }
         }
       });
