@@ -86,28 +86,65 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Send notes to the background script to be formatted and downloaded
-  saveButton.addEventListener('click', () => {
+  // Save notes for the current PDF to a text file
+  saveButton.addEventListener('click', async () => {
     if (currentPdfId) {
-      chrome.storage.local.get({ allNotes: {} }, (result) => {
+      // Show some loading state
+      statusMessage.textContent = 'Formatting notes...';
+      statusMessage.style.display = 'block';
+      saveButton.disabled = true;
+
+      chrome.storage.local.get({ allNotes: {} }, async (result) => {
         const notes = result.allNotes[currentPdfId] || [];
         if (notes.length === 0) {
           statusMessage.textContent = 'No notes to format.';
-          statusMessage.style.display = 'block';
           setTimeout(() => { statusMessage.style.display = 'none'; }, 3000);
+          saveButton.disabled = false;
           return;
         }
 
-        // Send the notes and title to the background script
-        chrome.runtime.sendMessage({
-          action: 'download_notes',
-          notes: notes,
-          title: currentPdfId
-        });
+        const notesForSummary = notes.map(note => note.note);
 
-        statusMessage.textContent = 'Formatting will continue in the background...';
-        statusMessage.style.display = 'block';
-        setTimeout(() => { window.close(); }, 2000); // Close the popup after a short delay
+        try {
+          const response = await fetch('https://ai-powered-note-taker.vercel.app/api/generate-summary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notes: notesForSummary, title: currentPdfId }), // send only note content and title
+          });
+
+          if (response.ok) {
+            const formattedNotes = await response.text();
+            const blob = new Blob([formattedNotes], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            chrome.downloads.download({
+              url: url,
+              filename: `${currentPdfId.replace(/[^a-z0-9]/gi, '_')}_notes.md`
+            }, (downloadId) => {
+              if (chrome.runtime.lastError) {
+                console.error('Save failed:', chrome.runtime.lastError.message);
+                statusMessage.textContent = 'Save failed.';
+              } else {
+                statusMessage.textContent = 'Download complete!';
+              }
+            });
+          } else {
+            const errorText = await response.text();
+            console.error('Failed to format notes:', errorText);
+            statusMessage.textContent = 'Failed to format notes.';
+          }
+        } catch (error) {
+          console.error('Error formatting notes:', error);
+          statusMessage.textContent = 'Error formatting notes.';
+        } finally {
+          saveButton.disabled = false;
+          // maybe hide status message after a delay if it's not a success message
+          setTimeout(() => {
+            if (statusMessage.textContent !== 'Generating note...') { // don't hide if another process is running
+                statusMessage.style.display = 'none';
+            }
+          }, 5000);
+        }
       });
     }
   });
