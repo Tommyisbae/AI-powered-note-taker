@@ -87,31 +87,62 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Save notes for the current PDF to a text file
-  saveButton.addEventListener('click', () => {
+  saveButton.addEventListener('click', async () => {
     if (currentPdfId) {
-      chrome.storage.local.get({ allNotes: {} }, (result) => {
+      // Show some loading state
+      statusMessage.textContent = 'Formatting notes...';
+      statusMessage.style.display = 'block';
+      saveButton.disabled = true;
+
+      chrome.storage.local.get({ allNotes: {} }, async (result) => {
         const notes = result.allNotes[currentPdfId] || [];
         if (notes.length === 0) {
+          statusMessage.textContent = 'No notes to format.';
+          setTimeout(() => { statusMessage.style.display = 'none'; }, 3000);
+          saveButton.disabled = false;
           return;
         }
 
-        // Prepare data for JSON export
-        const flashcards = notes.map(note => ({
-          question: note.question,
-          answer: note.note
-        }));
+        try {
+          const response = await fetch('https://ai-powered-note-taker.vercel.app/api/generate-summary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notes: notes, title: currentPdfId }), // send notes and title
+          });
 
-        const blob = new Blob([JSON.stringify(flashcards, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
+          if (response.ok) {
+            const formattedNotes = await response.text();
+            const blob = new Blob([formattedNotes], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
 
-        chrome.downloads.download({
-          url: url,
-          filename: `${currentPdfId.replace(/[^a-z0-9]/gi, '_')}_flashcards.json`
-        }, (downloadId) => {
-          if (chrome.runtime.lastError) {
-            console.error('Save failed:', chrome.runtime.lastError.message);
+            chrome.downloads.download({
+              url: url,
+              filename: `${currentPdfId.replace(/[^a-z0-9]/gi, '_')}_notes.md`
+            }, (downloadId) => {
+              if (chrome.runtime.lastError) {
+                console.error('Save failed:', chrome.runtime.lastError.message);
+                statusMessage.textContent = 'Save failed.';
+              } else {
+                statusMessage.textContent = 'Download complete!';
+              }
+            });
+          } else {
+            const errorText = await response.text();
+            console.error('Failed to format notes:', errorText);
+            statusMessage.textContent = 'Failed to format notes.';
           }
-        });
+        } catch (error) {
+          console.error('Error formatting notes:', error);
+          statusMessage.textContent = 'Error formatting notes.';
+        } finally {
+          saveButton.disabled = false;
+          // maybe hide status message after a delay if it's not a success message
+          setTimeout(() => {
+            if (statusMessage.textContent !== 'Generating note...') { // don't hide if another process is running
+                statusMessage.style.display = 'none';
+            }
+          }, 5000);
+        }
       });
     }
   });
