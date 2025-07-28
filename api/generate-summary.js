@@ -24,30 +24,43 @@ module.exports = async (req, res) => {
         return res.status(400).send('Missing or invalid `notes` array.');
       }
 
-      const prompt = `
-You are an expert academic note-synthesizer. Your task is to take a collection of individual notes, which were generated from highlights in a PDF document, and transform them into a single, coherent, and well-structured study guide.
-
-**Input:**
-You will receive a JSON object containing a 'title' for the document and a 'notes' array. Each object in the array contains a 'note' (a self-contained piece of information) and a 'question' (an active recall prompt for that note).
-
-**Task:**
-1.  **Analyze and Group:** Read through all the notes to identify core themes, topics, and sub-topics. Group related notes together.
-2.  **Synthesize and Refine:** Merge the information from related notes. Eliminate redundant information and resolve any minor discrepancies. Ensure the flow of information is logical. Do not just list the notes. Create a narrative or a structured explanation of the concepts.
-3.  **Structure and Format:** Organize the synthesized information into a clear, hierarchical document using Markdown.
-    *   Use the provided 'title' to create a main title for the document (e.g., '# Notes on: [title]').
-    *   Use headings ('##') and subheadings ('###') to structure the content by topic.
-    *   Use bullet points ('*') or numbered lists to present information clearly.
-    *   Use bold ('**') for key terms.
-4.  **Integrate Active Recall:** Weave the provided questions into the notes, or create new, more comprehensive questions that encourage active recall of the synthesized topics. Place them strategically within the document to test understanding.
-5.  **Output:** Produce a single Markdown string that is a high-quality, readable, and useful study guide. It should feel like a well-organized set of jottings perfect for revision.
-
-**Input Data:**
-Title: ${title}
-Notes: ${JSON.stringify(notes, null, 2)}
-
-**Output Specification:**
-A single string containing the formatted Markdown notes. Start directly with the Markdown, no preamble.
-`;
+      const prompt = JSON.stringify({
+        persona: "You are an expert academic note-synthesizer. Your primary function is to transform a collection of raw, individual notes from a PDF into a single, coherent, and well-structured study guide.",
+        task_definition: {
+          objective: "Synthesize the provided list of notes into a high-quality study guide formatted in Markdown.",
+          steps: [
+            {
+              step: 1,
+              action: "Analyze and Group",
+              details: "Read through all the notes to identify core themes, topics, and sub-topics. Group related notes together logically."
+            },
+            {
+              step: 2,
+              action: "Synthesize and Refine",
+              details: "Merge the information from related notes. It is critical to eliminate redundant information and resolve any minor discrepancies. The goal is to create a narrative or a structured explanation of the concepts, not just a list of the original notes. Ensure the flow of information is logical and easy to follow."
+            },
+            {
+              step: 3,
+              action: "Structure and Format",
+              details: "Organize the synthesized information into a clear, hierarchical document using Markdown."
+            }
+          ]
+        },
+        input_data: {
+          document_title: title,
+          notes: notes // This will now be an array of strings
+        },
+        output_specification: {
+          format: "A single string containing the complete, formatted Markdown document.",
+          schema: {
+            title: "# Notes on: [document_title]",
+            headings: "Use '##' for main topics and '###' for sub-topics.",
+            content: "Use bullet points ('*') or numbered lists for clarity.",
+            key_terms: "Use bold ('**') to highlight key terms.",
+            style: "The final output should be a clean, readable, and useful study guide, like a well-organized set of jottings perfect for revision. Do not include any questions or conversational preamble."
+          }
+        }
+      });
 
       const result = await model.generateContent(prompt);
       const formattedNotes = result.response.text();

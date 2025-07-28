@@ -103,11 +103,13 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
+        const notesForSummary = notes.map(note => note.note);
+
         try {
           const response = await fetch('https://ai-powered-note-taker.vercel.app/api/generate-summary', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ notes: notes, title: currentPdfId }), // send notes and title
+            body: JSON.stringify({ notes: notesForSummary, title: currentPdfId }), // send only note content and title
           });
 
           if (response.ok) {
